@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>灵气采集 - 修仙世界</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    /* 背景星空效果 */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* 主容器 */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 标题 */
+    .title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf, #ff006e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 40px;
+      letter-spacing: 3px;
+    }
+
+    /* 灵气显示区域 */
+    .spirit-panel {
+      background: linear-gradient(145deg, rgba(20, 20, 40, 0.9), rgba(10, 10, 30, 0.95));
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 20px;
+      padding: 30px 40px;
+      width: 100%;
+      max-width: 500px;
+      backdrop-filter: blur(10px);
+      box-shadow: 
+        0 0 40px rgba(0, 212, 255, 0.1),
+        inset 0 0 60px rgba(0, 212, 255, 0.05);
+      margin-bottom: 30px;
+    }
+
+    .spirit-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .spirit-name {
+      font-size: 1.3rem;
+      color: #00d4ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spirit-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00d4ff, #7b2cbf);
+      animation: spiritRotate 4s linear infinite;
+    }
+
+    @keyframes spiritRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .spirit-level {
+      font-size: 0.9rem;
+      color: #ff006e;
+      padding: 4px 12px;
+      background: rgba(255, 0, 110, 0.2);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 0, 110, 0.4);
+    }
+
+    /* 灵气进度条 */
+    .spirit-bar-container {
+      position: relative;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .spirit-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf, #ff006e);
+      border-radius: 15px;
+      transition: width 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .spirit-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      100% { left: 100%; }
+    }
+
+    .spirit-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 2;
+    }
+
+    /* 灵气数值 */
+    .spirit-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+
+    .spirit-stat {
+      text-align: center;
+    }
+
+    .spirit-stat-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #00d4ff;
+    }
+
+    .spirit-stat-label {
+      color: #888;
+      font-size: 0.8rem;
+    }
+
+    /* 采集区域 */
+    .cultivation-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    /* 灵气漩涡动画 */
+    .vortex-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .vortex {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: vortexSpin 3s linear infinite;
+    }
+
+    .vortex:nth-child(2) {
+      width: 70%;
+      height: 70%;
+      animation-duration: 2s;
+      animation-direction: reverse;
+      border-top-color: #7b2cbf;
+    }
+
+    .vortex:nth-child(3) {
+      width: 40%;
+      height: 40%;
+      animation-duration: 1s;
+      border-top-color: #ff006e;
+    }
+
+    @keyframes vortexSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* 采集按钮 */
+    .collect-btn {
+      padding: 20px 60px;
+      font-size: 1.3rem;
+      font-family: inherit;
+      background: linear-gradient(145deg, #1a1a3a, #0a0a2a);
+      color: #00d4ff;
+      border: 2px solid #00d4ff;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .collect-btn:hover {
+      background: linear-gradient(145deg, #00d4ff, #7b2cbf);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+      transform: scale(1.05);
+    }
+
+    .collect-btn:active {
+      transform: scale(0.98);
+    }
+
+    .collect-btn.collecting {
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.8); }
+    }
+
+    /* 灵气粒子效果 */
+    .spirit-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #00d4ff, transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particleFloat 1.5s ease-out forwards;
+    }
+
+    @keyframes particleFloat {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+
+    /* 自动采集指示 */
+    .auto-collect-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .toggle-switch.active {
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .toggle-switch.active .toggle-knob {
+      transform: translateX(24px);
+    }
+
+    .toggle-label {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* 采集记录 */
+    .log-panel {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(20, 20, 40, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .log-title {
+      font-size: 0.9rem;
+      color: #00d4ff;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      padding-bottom: 8px;
+    }
+
+    .log-entry {
+      font-size: 0.8rem;
+      color: #888;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .log-entry .time {
+      color: #666;
+    }
+
+    .log-entry .amount {
+      color: #00d4ff;
+    }
+
+    /* 飘字效果 */
+    .float-text {
+      position: absolute;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #00d4ff;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 100;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.5);
+      }
+    }
+
+    /* 底部信息 */
+    .footer-info {
+      margin-top: auto;
+      padding-top: 30px;
+      text-align: center;
+      color: #444;
+      font-size: 0.8rem;
+    }
+
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.5);
+      border-radius: 3px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 600px) {
+      .title {
+        font-size: 1.8rem;
+      }
+      
+      .spirit-panel {
+        padding: 20px;
+      }
+      
+      .collect-btn {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+      }
+      
+      .vortex-container {
+        width: 150px;
+        height: 150px;
+      }
+    }
+
+    /* ========== 新增：优化样式 ========== */
+    
+    /* 快捷操作面板 */
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+
+    .quick-btn {
+      flex: 1;
+      padding: 12px 15px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: rgba(20, 20, 40, 0.8);
+      color: #aaa;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .quick-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      border-color: rgba(0, 212, 255, 0.4);
+      color: #00d4ff;
+      transform: translateY(-2px);
+    }
+
+    .quick-btn-icon {
+      font-size: 1.2rem;
+    }
+
+    /* 突破确认弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: linear-gradient(145deg, #1a1a3a, #0a0a2a);
+      border: 2px solid #ff006e;
+      border-radius: 20px;
+      padding: 30px 40px;
+      text-align: center;
+      animation: modalPop 0.3s ease;
+      box-shadow: 0 0 60px rgba(255, 0, 110, 0.4);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      color: #ff006e;
+      margin-bottom: 15px;
+    }
+
+    .modal-text {
+      color: #ccc;
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 12px 30px;
+      font-size: 1rem;
+      font-family: inherit;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal-btn.confirm {
+      background: linear-gradient(145deg, #ff006e, #7b2cbf);
+      color: #fff;
+      border: none;
+    }
+
+    .modal-btn.confirm:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+    }
+
+    .modal-btn.cancel {
+      background: transparent;
+      color: #888;
+      border: 1px solid #444;
+    }
+
+    .modal-btn.cancel:hover {
+      border-color: #666;
+      color: #ccc;
+    }
+
+    /* 灵气满时的脉冲动画 */
+    .spirit-bar-container.full {
+      animation: fullPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes fullPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 110, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(255, 0, 110, 0.8); }
+    }
+
+    /* 成就提示 */
+    .achievement {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(145deg, #1a1a3a, #0a0a2a);
+      border: 1px solid #ffd700;
+      border-radius: 10px;
+      padding: 15px 20px;
+      display: none;
+      animation: slideIn 0.5s ease;
+      z-index: 1001;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .achievement.show {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    @keyframes slideIn {
+      0% { transform: translateX(100%); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    .achievement-icon {
+      font-size: 1.5rem;
+    }
+
+    .achievement-text {
+      color: #ffd700;
+      font-size: 0.9rem;
+    }
+
+    /* 长按连续采集提示 */
+    .collect-btn.holding {
+      animation: holdPulse 0.2s ease-in-out infinite;
+    }
+
+    @keyframes holdPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+    }
+
+    /* 属性详情面板 */
+    .stats-panel {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(20, 20, 40, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .stats-title {
+      font-size: 0.9rem;
+      color: #00d4ff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-item-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .stat-item-value {
+      font-size: 1rem;
+      color: #00d4ff;
+    }
+
+    /* 底部操作栏 */
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 26, 0.95);
+      border-top: 1px solid rgba(0, 212, 255, 0.2);
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .action-bar-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      color: #888;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .action-bar-btn:hover {
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .container {
+      padding-bottom: 80px;
+    }
+
+    /* 优化：日志面板增加新条目高亮 */
+    .log-entry.new {
+      animation: logHighlight 1s ease;
+    }
+
+    @keyframes logHighlight {
+      0% { background: rgba(0, 212, 255, 0.3); }
+      100% { background: transparent; }
+    }
+
+    /* 优化：触摸设备友好 */
+    @media (hover: none) {
+      .collect-btn:active {
+        transform: scale(0.95);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 星空背景 -->
+  <div class="stars" id="stars"></div>
+
+  <!-- 成就提示 -->
+  <div class="achievement" id="achievement">
+    <span class="achievement-icon">🏆</span>
+    <span class="achievement-text" id="achievementText">成就解锁！</span>
+  </div>
+
+  <!-- 突破确认弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title">⚡ 境界突破</div>
+      <div class="modal-text" id="modalText">是否突破到下一境界？</div>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" id="modalCancel">稍后再说</button>
+        <button class="modal-btn confirm" id="modalConfirm">立即突破</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 class="title">灵气采集</h1>
+    <p class="subtitle">修仙世界 · 吐纳修炼</p>
+
+    <!-- 快捷操作面板 -->
+    <div class="quick-actions">
+      <button class="quick-btn" id="saveBtn">
+        <span class="quick-btn-icon">💾</span>
+        <span>保存进度</span>
+      </button>
+      <button class="quick-btn" id="loadBtn">
+        <span class="quick-btn-icon">📂</span>
+        <span>读取存档</span>
+      </button>
+      <button class="quick-btn" id="resetBtn">
+        <span class="quick-btn-icon">🔄</span>
+        <span>重置修炼</span>
+      </button>
+    </div>
+
+    <!-- 灵气显示面板 -->
+    <div class="spirit-panel">
+      <div class="spirit-label">
+        <div class="spirit-name">
+          <div class="spirit-icon"></div>
+          <span>天地灵气</span>
+        </div>
+        <div class="spirit-level">Lv.<span id="level">1</span> 筑基期</div>
+      </div>
+      
+      <div class="spirit-bar-container">
+        <div class="spirit-bar" id="spiritBar" style="width: 0%"></div>
+        <span class="spirit-text"><span id="currentSpirit">0</span> / <span id="maxSpirit">100</span></span>
+      </div>
+      
+      <div class="spirit-stats">
+        <div class="spirit-stat">
+          <div class="spirit-stat-value" id="totalSpirit">0</div>
+          <div class="spirit-stat-label">累计灵气</div>
+        </div>
+        <div class="spirit-stat">
+          <div class="spirit-stat-value" id="collectRate">0</div>
+          <div class="spirit-stat-label">采集速度/秒</div>
+        </div>
+        <div class="spirit-stat">
+          <div class="spirit-stat-value" id="efficiency">100%</div>
+          <div class="spirit-stat-label">修炼效率</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 采集区域 -->
+    <div class="cultivation-area">
+      <div class="vortex-container" id="vortexContainer">
+        <div class="vortex"></div>
+        <div class="vortex"></div>
+        <div class="vortex"></div>
+      </div>
+
+      <button class="collect-btn" id="collectBtn">
+        开始采集
+      </button>
+
+      <div class="auto-collect-toggle">
+        <div class="toggle-switch" id="autoToggle">
+          <div class="toggle-knob"></div>
+        </div>
+        <span class="toggle-label">自动吐纳（每秒自动采集）</span>
+      </div>
+    </div>
+
+    <!-- 采集记录 -->
+    <div class="log-panel">
+      <div class="log-title">📜 修炼记录</div>
+      <div id="logContent">
+        <div class="log-entry">
+          <span class="time">--:--:--</span>
+          <span>欢迎来到修仙世界，开始你的修炼之旅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 属性详情面板 -->
+    <div class="stats-panel">
+      <div class="stats-title">📊 修炼统计</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-item-label">修炼时长</div>
+          <div class="stat-item-value" id="playTime">0分钟</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">点击次数</div>
+          <div class="stat-item-value" id="clickCount">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">境界突破</div>
+          <div class="stat-item-value" id="levelUpCount">0次</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item-label">最大灵气</div>
+          <div class="stat-item-value" id="maxSpiritRecord">100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-info">
+      修仙世界 v1.1 · 灵气采集演示
+    </div>
+  </div>
+
+  <!-- 底部操作栏 -->
+  <div class="action-bar">
+    <button class="action-bar-btn" id="toggleStats">📊 统计</button>
+    <button class="action-bar-btn" id="toggleLog">📜 日志</button>
+    <button class="action-bar-btn" id="helpBtn">❓ 帮助</button>
+  </div>
+
+  <script>
+    // 游戏状态
+    const gameState = {
+      currentSpirit: 0,
+      maxSpirit: 100,
+      totalSpirit: 0,
+      level: 1,
+      cultivationStage: '筑基期',
+      collectRate: 0,
+      efficiency: 100,
+      isCollecting: false,
+      autoCollect: false,
+      logs: [],
+      // 新增：游戏统计
+      playTime: 0,
+      clickCount: 0,
+      levelUpCount: 0,
+      maxSpiritRecord: 100,
+      startTime: Date.now(),
+      pendingLevelUp: false
+    };
+
+    // 修炼阶段
+    const cultivationStages = [
+      { level: 1, name: '筑基期', max: 100 },
+      { level: 2, name: '金丹期', max: 500 },
+      { level: 3, name: '元婴期', max: 2000 },
+      { level: 4, name: '化神期', max: 10000 },
+      { level: 5, name: '炼虚期', max: 50000 },
+      { level: 6, name: '大乘期', max: 200000 },
+      { level: 7, name: '渡劫期', max: 1000000 },
+      { level: 8, name: '仙人', max: Infinity }
+    ];
+
+    // DOM 元素
+    const elements = {
+      spiritBar: document.getElementById('spiritBar'),
+      currentSpirit: document.getElementById('currentSpirit'),
+      maxSpirit: document.getElementById('maxSpirit'),
+      totalSpirit: document.getElementById('totalSpirit'),
+      level: document.getElementById('level'),
+      collectRate: document.getElementById('collectRate'),
+      efficiency: document.getElementById('efficiency'),
+      collectBtn: document.getElementById('collectBtn'),
+      autoToggle: document.getElementById('autoToggle'),
+      logContent: document.getElementById('logContent'),
+      vortexContainer: document.getElementById('vortexContainer'),
+      stars: document.getElementById('stars'),
+      // 新增元素
+      modalOverlay: document.getElementById('modalOverlay'),
+      modalConfirm: document.getElementById('modalConfirm'),
+      modalCancel: document.getElementById('modalCancel'),
+      modalText: document.getElementById('modalText'),
+      achievement: document.getElementById('achievement'),
+      achievementText: document.getElementById('achievementText'),
+      playTime: document.getElementById('playTime'),
+      clickCount: document.getElementById('clickCount'),
+      levelUpCount: document.getElementById('levelUpCount'),
+      maxSpiritRecord: document.getElementById('maxSpiritRecord'),
+      statsPanel: document.querySelector('.stats-panel'),
+      logPanel: document.querySelector('.log-panel')
+    };
+
+    // 创建星空背景
+    function createStars() {
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        elements.stars.appendChild(star);
+      }
+    }
+
+    // 更新UI
+    function updateUI() {
+      const percentage = (gameState.currentSpirit / gameState.maxSpirit) * 100;
+      elements.spiritBar.style.width = percentage + '%';
+      elements.currentSpirit.textContent = Math.floor(gameState.currentSpirit);
+      elements.maxSpirit.textContent = gameState.maxSpirit === Infinity ? '∞' : gameState.maxSpirit;
+      elements.totalSpirit.textContent = formatNumber(gameState.totalSpirit);
+      elements.level.textContent = gameState.level;
+      elements.collectRate.textContent = formatNumber(gameState.collectRate);
+      elements.efficiency.textContent = gameState.efficiency + '%';
+      
+      // 更新修炼阶段
+      const stage = cultivationStages.find(s => s.level === gameState.level);
+      if (stage) {
+        document.querySelector('.spirit-level').innerHTML = `Lv.<span id="level">${gameState.level}</span> ${stage.name}`;
+      }
+    }
+
+    // 格式化数字
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return Math.floor(num).toString();
+    }
+
+    // 添加日志
+    function addLog(message) {
+      const now = new Date();
+      const time = now.toTimeString().split(' ')[0];
+      
+      gameState.logs.unshift({ time, message });
+      if (gameState.logs.length > 10) gameState.logs.pop();
+      
+      elements.logContent.innerHTML = gameState.logs.map(log => 
+        `<div class="log-entry"><span class="time">${log.time}</span><span>${log.message}</span></div>`
+      ).join('');
+    }
+
+    // 采集灵气
+    function collectSpirit() {
+      const baseAmount = 5 + gameState.level * 2;
+      const amount = baseAmount * (gameState.efficiency / 100);
+      const actualAmount = Math.min(amount, gameState.maxSpirit - gameState.currentSpirit);
+      
+      if (actualAmount <= 0) {
+        addLog('⚠️ 灵气已满，需突破境界');
+        return;
+      }
+
+      gameState.currentSpirit += actualAmount;
+      gameState.totalSpirit += actualAmount;
+      gameState.collectRate = amount;
+      gameState.clickCount++;
+      
+      // 更新最大灵气记录
+      if (gameState.maxSpirit > gameState.maxSpiritRecord) {
+        gameState.maxSpiritRecord = gameState.maxSpirit;
+      }
+      
+      // 检查升级
+      checkLevelUp();
+      
+      // 创建粒子效果
+      createParticles();
+      
+      // 创建飘字
+      createFloatText('+' + formatNumber(actualAmount));
+      
+      // 更新UI
+      updateUI();
+      
+      // 更新日志
+      addLog(`采集到 ${formatNumber(actualAmount)} 点灵气`);
+    }
+
+    // 更新统计面板
+    function updateStats() {
+      const playMinutes = Math.floor((Date.now() - gameState.startTime) / 60000) + gameState.playTime;
+      elements.playTime.textContent = playMinutes + '分钟';
+      elements.clickCount.textContent = gameState.clickCount;
+      elements.levelUpCount.textContent = gameState.levelUpCount + '次';
+      elements.maxSpiritRecord.textContent = formatNumber(gameState.maxSpiritRecord);
+    }
+
+    // 检查升级 - 显示确认弹窗
+    function checkLevelUp() {
+      if (gameState.currentSpirit >= gameState.maxSpirit && gameState.level < 8) {
+        gameState.pendingLevelUp = true;
+        const stage = cultivationStages.find(s => s.level === gameState.level + 1);
+        
+        // 显示突破确认弹窗
+        elements.modalText.textContent = `是否突破到 ${stage.name}？\n突破后灵气上限提升！`;
+        elements.modalOverlay.classList.add('active');
+        
+        // 进度条闪烁提示
+        document.querySelector('.spirit-bar-container').classList.add('full');
+      }
+    }
+
+    // 确认突破
+    function confirmLevelUp() {
+      if (!gameState.pendingLevelUp) return;
+      
+      gameState.level++;
+      const stage = cultivationStages.find(s => s.level === gameState.level);
+      gameState.maxSpirit = stage.max;
+      gameState.currentSpirit = 0;
+      gameState.efficiency += 10;
+      gameState.levelUpCount++;
+      gameState.pendingLevelUp = false;
+      
+      // 关闭弹窗
+      elements.modalOverlay.classList.remove('active');
+      document.querySelector('.spirit-bar-container').classList.remove('full');
+      
+      addLog(`🎉 突破成功！进入 ${stage.name}`);
+      createFloatText('突破！', '#ff006e');
+      
+      // 显示成就
+      showAchievement(`境界突破：${stage.name}！`);
+      
+      // 保存进度
+      saveGame();
+      
+      updateUI();
+    }
+
+    // 取消突破
+    function cancelLevelUp() {
+      elements.modalOverlay.classList.remove('active');
+      document.querySelector('.spirit-bar-container').classList.remove('full');
+      addLog('⏳ 暂缓突破，继续积累灵气');
+    }
+
+    // 显示成就
+    function showAchievement(text) {
+      elements.achievementText.textContent = text;
+      elements.achievement.classList.add('show');
+      
+      setTimeout(() => {
+        elements.achievement.classList.remove('show');
+      }, 3000);
+    }
+
+    // 创建粒子效果
+    function createParticles() {
+      const container = elements.vortexContainer;
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'spirit-particle';
+        
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = 80 + Math.random() * 40;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        
+        container.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), 1500);
+      }
+    }
+
+    // 创建飘字效果
+    function createFloatText(text, color = '#00d4ff') {
+      const btn = elements.collectBtn;
+      const rect = btn.getBoundingClientRect();
+      
+      const floatText = document.createElement('div');
+      floatText.className = 'float-text';
+      floatText.textContent = text;
+      floatText.style.left = rect.left + rect.width / 2 + 'px';
+      floatText.style.top = rect.top + 'px';
+      floatText.style.color = color;
+      
+      document.body.appendChild(floatText);
+      
+      setTimeout(() => floatText.remove(), 1000);
+    }
+
+    // 按钮点击事件
+    elements.collectBtn.addEventListener('click', () => {
+      if (!gameState.isCollecting) {
+        gameState.isCollecting = true;
+        elements.collectBtn.classList.add('collecting');
+        elements.collectBtn.textContent = '采集中...';
+        
+        collectSpirit();
+        
+        setTimeout(() => {
+          gameState.isCollecting = false;
+          elements.collectBtn.classList.remove('collecting');
+          elements.collectBtn.textContent = '开始采集';
+        }, 500);
+      }
+    });
+
+    // 自动采集开关
+    elements.autoToggle.addEventListener('click', () => {
+      gameState.autoCollect = !gameState.autoCollect;
+      elements.autoToggle.classList.toggle('active', gameState.autoCollect);
+      
+      if (gameState.autoCollect) {
+        addLog('🌙 开始自动吐纳修炼');
+      } else {
+        addLog('☀️ 停止自动吐纳');
+      }
+    });
+
+    // 弹窗按钮事件
+    elements.modalConfirm.addEventListener('click', confirmLevelUp);
+    elements.modalCancel.addEventListener('click', cancelLevelUp);
+    elements.modalOverlay.addEventListener('click', (e) => {
+      if (e.target === elements.modalOverlay) cancelLevelUp();
+    });
+
+    // 保存游戏
+    function saveGame() {
+      const saveData = {
+        currentSpirit: gameState.currentSpirit,
+        maxSpirit: gameState.maxSpirit,
+        totalSpirit: gameState.totalSpirit,
+        level: gameState.level,
+        efficiency: gameState.efficiency,
+        playTime: gameState.playTime,
+        clickCount: gameState.clickCount,
+        levelUpCount: gameState.levelUpCount,
+        maxSpiritRecord: gameState.maxSpiritRecord,
+        saveTime: Date.now()
+      };
+      localStorage.setItem('xianxia_save', JSON.stringify(saveData));
+      addLog('💾 进度已保存');
+    }
+
+    // 读取存档
+    function loadGame() {
+      const saveData = localStorage.getItem('xianxia_save');
+      if (saveData) {
+        const data = JSON.parse(saveData);
+        gameState.currentSpirit = data.currentSpirit || 0;
+        gameState.maxSpirit = data.maxSpirit || 100;
+        gameState.totalSpirit = data.totalSpirit || 0;
+        gameState.level = data.level || 1;
+        gameState.efficiency = data.efficiency || 100;
+        gameState.playTime = data.playTime || 0;
+        gameState.clickCount = data.clickCount || 0;
+        gameState.levelUpCount = data.levelUpCount || 0;
+        gameState.maxSpiritRecord = data.maxSpiritRecord || 100;
+        
+        // 计算离线收益
+        if (data.saveTime) {
+          const offlineSeconds = Math.floor((Date.now() - data.saveTime) / 1000);
+          if (offlineSeconds > 60 && gameState.autoCollect) {
+            const offlineGain = Math.min(offlineSeconds * 5, gameState.maxSpirit - gameState.currentSpirit);
+            gameState.currentSpirit += offlineGain;
+            gameState.totalSpirit += offlineGain;
+            addLog(`🏠 离线 ${Math.floor(offlineSeconds / 60)} 分钟，获得 ${Math.floor(offlineGain)} 点灵气`);
+          }
+        }
+        
+        updateUI();
+        addLog('📂 进度已读取');
+      } else {
+        addLog('📂 暂无存档');
+      }
+    }
+
+    // 重置游戏
+    function resetGame() {
+      if (confirm('确定要重置所有修炼进度吗？此操作不可恢复！')) {
+        localStorage.removeItem('xianxia_save');
+        gameState.currentSpirit = 0;
+        gameState.maxSpirit = 100;
+        gameState.totalSpirit = 0;
+        gameState.level = 1;
+        gameState.efficiency = 100;
+        gameState.playTime = 0;
+        gameState.clickCount = 0;
+        gameState.levelUpCount = 0;
+        gameState.maxSpiritRecord = 100;
+        gameState.logs = [];
+        
+        updateUI();
+        addLog('🔄 修炼已重置，重新开始修仙之旅');
+      }
+    }
+
+    // 快捷操作按钮
+    document.getElementById('saveBtn').addEventListener('click', saveGame);
+    document.getElementById('loadBtn').addEventListener('click', loadGame);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    // 底部操作栏
+    document.getElementById('toggleStats').addEventListener('click', () => {
+      elements.statsPanel.style.display = elements.statsPanel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('toggleLog').addEventListener('click', () => {
+      elements.logPanel.style.display = elements.logPanel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('helpBtn').addEventListener('click', () => {
+      alert('🎮 修仙世界帮助\n\n1. 点击"开始采集"或长按获取灵气\n2. 灵气满后点击突破境界\n3. 开启自动吐纳可自动修炼\n4. 点击保存进度到本地\n5. 境界越高，灵气上限越高！');
+    });
+
+    // 长按连续采集
+    let holdInterval = null;
+    elements.collectBtn.addEventListener('mousedown', () => {
+      if (!gameState.isCollecting) {
+        elements.collectBtn.classList.add('holding');
+        holdInterval = setInterval(() => {
+          if (!gameState.pendingLevelUp) {
+            collectSpirit();
+          }
+        }, 200);
+      }
+    });
+
+    elements.collectBtn.addEventListener('mouseup', () => {
+      elements.collectBtn.classList.remove('holding');
+      if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+      }
+    });
+
+    elements.collectBtn.addEventListener('mouseleave', () => {
+      elements.collectBtn.classList.remove('holding');
+      if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+      }
+    });
+
+    // 触摸设备支持
+    elements.collectBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (!gameState.isCollecting) {
+        elements.collectBtn.classList.add('holding');
+        holdInterval = setInterval(() => {
+          if (!gameState.pendingLevelUp) {
+            collectSpirit();
+          }
+        }, 200);
+      }
+    });
+
+    elements.collectBtn.addEventListener('touchend', () => {
+      elements.collectBtn.classList.remove('holding');
+      if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+      }
+    });
+
+    // 自动采集循环
+    setInterval(() => {
+      if (gameState.autoCollect) {
+        collectSpirit();
+      }
+    }, 1000);
+
+    // 实时更新采集速率显示
+    setInterval(() => {
+      if (!gameState.autoCollect) {
+        gameState.collectRate = Math.max(0, gameState.collectRate - 1);
+        elements.collectRate.textContent = formatNumber(gameState.collectRate);
+      }
+    }, 1000);
+
+    // 初始化
+    createStars();
+    updateUI();
+    updateStats();
+
+    // 每秒更新统计
+    setInterval(() => {
+      if (gameState.autoCollect) {
+        updateStats();
+      }
+    }, 1000);
+
+    // 每10秒自动保存
+    setInterval(() => {
+      if (gameState.totalSpirit > 0) {
+        saveGame();
+      }
+    }, 10000);
+  </script>
+</body>
+</html>
